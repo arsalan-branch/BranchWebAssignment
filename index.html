@@ -127,7 +127,7 @@
             // Parse user agent to get OS and OS version
             const parser = new UAParser(userAgent);
             const os = parser.getOS().name;
-            const osVersion = parser.getOS().version.join('.');
+            const osVersion = parser.getOS().version;
 
             // Get the public IP address
             getPublicIp().then(ip => {
