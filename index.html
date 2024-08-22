@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Branch Web SDK Demo</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ua-parser-js/1.0.0/ua-parser.min.js"></script>
 </head>
 
 <body>
@@ -86,7 +87,7 @@
 
 
         // Example: Trigger a custom event on button click
-        document.getElementById('custom-event').addEventListener('click', function() {
+        document.getElementById('custom-event').addEventListener('click', function () {
             // Define custom event data
             var customData = {
                 "Custom_Event_Property_Key1": "Custom_Event_Property_val1",
@@ -97,7 +98,7 @@
             branch.logEvent(
                 'custom_event_name',
                 customData,
-                function(err) {
+                function (err) {
                     if (err) {
                         console.error('Failed to log custom event:', err);
                     } else {
@@ -108,136 +109,148 @@
         });
 
 
+        //S2S
+
+        // Function to fetch the public IP address
+        function getPublicIp() {
+            return fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => data.ip)
+                .catch(() => 'unknown');
+        }
+
+        // Function to send the purchase event
+        function sendPurchaseEvent() {
+            // Get the user agent from the browser
+            const userAgent = navigator.userAgent;
+
+            // Parse user agent to get OS and OS version
+            const parser = new UAParser(userAgent);
+            const os = parser.getOS().name;
+            const osVersion = parser.getOS().version.join('.');
+
+            // Get the public IP address
+            getPublicIp().then(ip => {
+                // Get browser fingerprint ID
+                branch.getBrowserFingerprintId(function (err, browserFingerprintId) {
+                    if (err) {
+                        console.error('Error getting browser fingerprint ID:', err);
+                        return;
+                    }
+
+                    // Define the event payload
+                    const eventPayload = {
+                        "name": "PURCHASE",
+                        "customer_event_alias": "my custom alias",
+                        "user_data": {
+                            "os_version": osVersion,
+                            "limit_ad_tracking": false,
+                            "developer_identity": "user123",
+                            "browser_fingerprint_id": browserFingerprintId,
+                            "language": "en",
+                            "ip": ip,
+                            "local_ip": "192.168.1.2", 
+                            "app_version": "1.0.0", // Example static value
+                            "user_agent": userAgent,
+                            "os": os
+                        },
+                        "custom_data": {
+                            "purchase_loc": "Palo Alto",
+                            "store_pickup": "unavailable"
+                        },
+                        "event_data": {
+                            "transaction_id": "trans_Id_1232343434",
+                            "currency": "USD",
+                            "revenue": 180.2,
+                            "shipping": 10.5,
+                            "tax": 13.5,
+                            "coupon": "promo-1234",
+                            "affiliation": "high_fi",
+                            "description": "Preferred purchase",
+                            "custom_param_1": "Parameter 1",
+                            "custom_param_2": "Parameter 2",
+                            "custom_param_3": "Parameter 3"
+                        },
+                        "content_items": [
+                            {
+                                "$content_schema": "COMMERCE_PRODUCT",
+                                "$og_title": "Nike Shoe",
+                                "$og_description": "Start loving your steps",
+                                "$og_image_url": "http://example.com/img1.jpg",
+                                "$canonical_identifier": "nike/1234",
+                                "$publicly_indexable": false,
+                                "$price": 101.2,
+                                "$locally_indexable": true,
+                                "$quantity": 1,
+                                "$sku": "1101123445",
+                                "$product_name": "Runner",
+                                "$product_brand": "Nike",
+                                "$product_category": "Sporting Goods",
+                                "$product_variant": "XL",
+                                "$rating_average": 4.2,
+                                "$rating_count": 5,
+                                "$rating_max": 2.2,
+                                "$creation_timestamp": 1499892854966,
+                                "$exp_date": 1499892854966,
+                                "$keywords": ["sneakers", "shoes"],
+                                "$address_street": "230 South LaSalle Street",
+                                "$address_city": "Chicago",
+                                "$address_region": "IL",
+                                "$address_country": "US",
+                                "$address_postal_code": "60604",
+                                "$latitude": 12.07,
+                                "$longitude": -97.5,
+                                "$image_captions": ["my_img_caption1", "my_img_caption_2"],
+                                "$condition": "NEW",
+                                "$custom_fields": "{\"foo1\":\"bar1\",\"foo2\":\"bar2\"}"
+                            },
+                            {
+                                "$og_title": "Nike Woolen Sox",
+                                "$canonical_identifier": "nike/5324",
+                                "$og_description": "Fine combed woolen sox for those who love your foot",
+                                "$publicly_indexable": false,
+                                "$price": 80.2,
+                                "$locally_indexable": true,
+                                "$quantity": 5,
+                                "$sku": "110112467",
+                                "$product_name": "Woolen Sox",
+                                "$product_brand": "Nike",
+                                "$product_category": "Apparel & Accessories",
+                                "$product_variant": "Xl",
+                                "$rating_average": 3.3,
+                                "$rating_count": 5,
+                                "$rating_max": 2.8,
+                                "$creation_timestamp": 1499892854966
+                            }
+                        ],
+                        "metadata": {},
+                        "branch_key": "key_live_jveDhIVvDiCtfFUER6qYxkggEDerqp2j"
+                    };
+
+                    // Send the request
+                    fetch('https://api2.branch.io/v2/event/standard', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(eventPayload)
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Event successfully sent:', data);
+                        })
+                        .catch((error) => {
+                            console.error('Error sending event:', error);
+                        });
+                });
+            });
+        }
 
 
-        
-        //S2S 
-// Function to fetch the public IP address
-function getPublicIp() {
-    return fetch('https://api.ipify.org?format=json')
-        .then(response => response.json())
-        .then(data => data.ip)
-        .catch(() => 'unknown');
-}
+        // Example usage: Trigger the event when a button is clicked
+        document.getElementById('s2s-event').addEventListener('click', sendPurchaseEvent);
 
-// Function to send the purchase event
-function sendPurchaseEvent() {
-    // Get the user agent from the browser
-    const userAgent = navigator.userAgent;
 
-    // Get the public IP address
-    getPublicIp().then(ip => {
-        // Define the event payload
-        const eventPayload = {
-            "name": "PURCHASE",
-            "customer_event_alias": "my custom alias",
-            "user_data": {
-                "os_version": "25", // You might want to dynamically determine this based on user agent or other means
-                "limit_ad_tracking": false,
-                "developer_identity": "user123",
-                "browser_fingerprint_id": "1181841089974941236",
-                "language": "en",
-                "ip": ip,
-                "local_ip": "192.168.1.2", // You might need a different method to get local IP
-                "app_version": "1.0.0", // Example static value
-                "user_agent": userAgent,
-                "os": "Android" // You might want to dynamically determine this
-            },
-            "custom_data": {
-                "purchase_loc": "Palo Alto",
-                "store_pickup": "unavailable"
-            },
-            "event_data": {
-                "transaction_id": "trans_Id_1232343434",
-                "currency": "USD",
-                "revenue": 180.2,
-                "shipping": 10.5,
-                "tax": 13.5,
-                "coupon": "promo-1234",
-                "affiliation": "high_fi",
-                "description": "Preferred purchase",
-                "custom_param_1": "Parameter 1",
-                "custom_param_2": "Parameter 2",
-                "custom_param_3": "Parameter 3"
-            },
-            "content_items": [
-                {
-                    "$content_schema": "COMMERCE_PRODUCT",
-                    "$og_title": "Nike Shoe",
-                    "$og_description": "Start loving your steps",
-                    "$og_image_url": "http://example.com/img1.jpg",
-                    "$canonical_identifier": "nike/1234",
-                    "$publicly_indexable": false,
-                    "$price": 101.2,
-                    "$locally_indexable": true,
-                    "$quantity": 1,
-                    "$sku": "1101123445",
-                    "$product_name": "Runner",
-                    "$product_brand": "Nike",
-                    "$product_category": "Sporting Goods",
-                    "$product_variant": "XL",
-                    "$rating_average": 4.2,
-                    "$rating_count": 5,
-                    "$rating_max": 2.2,
-                    "$creation_timestamp": 1499892854966,
-                    "$exp_date": 1499892854966,
-                    "$keywords": ["sneakers", "shoes"],
-                    "$address_street": "230 South LaSalle Street",
-                    "$address_city": "Chicago",
-                    "$address_region": "IL",
-                    "$address_country": "US",
-                    "$address_postal_code": "60604",
-                    "$latitude": 12.07,
-                    "$longitude": -97.5,
-                    "$image_captions": ["my_img_caption1", "my_img_caption_2"],
-                    "$condition": "NEW",
-                    "$custom_fields": "{\"foo1\":\"bar1\",\"foo2\":\"bar2\"}"
-                },
-                {
-                    "$og_title": "Nike Woolen Sox",
-                    "$canonical_identifier": "nike/5324",
-                    "$og_description": "Fine combed woolen sox for those who love your foot",
-                    "$publicly_indexable": false,
-                    "$price": 80.2,
-                    "$locally_indexable": true,
-                    "$quantity": 5,
-                    "$sku": "110112467",
-                    "$product_name": "Woolen Sox",
-                    "$product_brand": "Nike",
-                    "$product_category": "Apparel & Accessories",
-                    "$product_variant": "Xl",
-                    "$rating_average": 3.3,
-                    "$rating_count": 5,
-                    "$rating_max": 2.8,
-                    "$creation_timestamp": 1499892854966
-                }
-            ],
-            "metadata": {},
-            "branch_key": "key_live_jveDhIVvDiCtfFUER6qYxkggEDerqp2j"
-        };
-
-        // Send the request
-        fetch('https://api2.branch.io/v2/event/standard', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(eventPayload)
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Event successfully sent:', data);
-        })
-        .catch((error) => {
-            console.error('Error sending event:', error);
-        });
-    });
-}
-
-// Example usage: Trigger the event when a button is clicked
-document.getElementById('s2s-event').addEventListener('click', sendPurchaseEvent);
-
-        
 
     </script>
 </body>
