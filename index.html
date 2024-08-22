@@ -1,1 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Branch Web SDK Demo</title>
+</head>
+<body>
+    <h1>Branch Web SDK Integration</h1>
+    <button id="branch-link">Create Branch Link</button>
 
+    <script>
+        // Load Branch Web SDK
+        (function(b,r,a,n,c,h,_,s,d,k){
+            if(!b[n]||!b[n]._q){
+                for(;s<_.length;)c(h,_[s++]);
+                d=r.createElement(a);d.async=1;d.src="https://cdn.branch.io/branch-latest.min.js";
+                k=r.getElementsByTagName(a)[0];k.parentNode.insertBefore(d,k);
+                b[n]=h;b[n]._q=[];function c(h,i){h[i]=function(){h._q.push([i,arguments])}};
+                _=['init','data','first','setIdentity','setBranchViewData','disableTracking','logEvent','link','sendSMS','referrals','credits','redeem','autotrack','banner','closeBanner','track','validateBanner','bannerDetails','closeBanner','bannerDetails','appLink','journeys','appLinks','setIdentity','logout','session'];for(s=0;s<_.length;s++)c(b[n],_[s])}
+        })(window,document,"script","branch");
+
+        // Initialize Branch
+        branch.init('YOUR_BRANCH_KEY', function(err, data) {
+            if (err) {
+                console.error('Branch initialization failed:', err);
+            } else {
+                console.log('Branch initialized:', data);
+            }
+        });
+
+        // Example: Create a Branch link on button click
+        document.getElementById('branch-link').addEventListener('click', function() {
+            branch.link({
+                tags: ['tag1', 'tag2'],
+                channel: 'website',
+                feature: 'create-link',
+                stage: 'new user',
+                data: {
+                    mydata: 'something',
+                    foo: 'bar',
+                    '$desktop_url': 'https://example.com',
+                    '$ios_url': 'https://example.com/ios',
+                    '$android_url': 'https://example.com/android'
+                }
+            }, function(err, link) {
+                if (err) {
+                    console.error('Failed to create link:', err);
+                } else {
+                    console.log('Branch link created:', link);
+                    alert('Branch link created: ' + link);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
