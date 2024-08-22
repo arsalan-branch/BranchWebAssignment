@@ -21,3 +21,13 @@ h1 {
     white-space: pre-wrap; /* Preserve whitespace and allow wrapping */
     word-wrap: break-word; /* Prevent long words from overflowing */
 }
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.button-container button {
+    margin-bottom: 10px; /* Adjust spacing between buttons as needed */
+}
