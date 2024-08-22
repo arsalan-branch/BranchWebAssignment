@@ -5,14 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Branch Web SDK Demo</title>
-    
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="Branch Web SDK Demo">
-    <meta property="og:description" content="A demo page showcasing Branch Web SDK integration and custom events.">
-    <meta property="og:image" content="https://example.com/path/to/image.jpg">
-    <meta property="og:url" content="https://example.com/branch-web-sdk-demo">
-    <meta property="og:type" content="ogtest">
-    <meta property="og:site_name" content="Branch Web SDK Demo">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/ua-parser-js/dist/ua-parser.min.js"></script>
 </head>
@@ -34,7 +26,7 @@
         (function (b, r, a, n, c, h, _, s, d, k) { if (!b[n] || !b[n]._q) { for (; s < _.length;)c(h, _[s++]); d = r.createElement(a); d.async = 1; d.src = "https://cdn.branch.io/branch-latest.min.js"; k = r.getElementsByTagName(a)[0]; k.parentNode.insertBefore(d, k); b[n] = h } })(window, document, "script", "branch", function (b, r) { b[r] = function () { b._q.push([r, arguments]) } }, { _q: [], _v: 1 }, "addListener banner closeBanner closeJourney data deepview deepviewCta first init link logout removeListener setBranchViewData setIdentity track trackCommerceEvent logEvent disableTracking getBrowserFingerprintId crossPlatformIds lastAttributedTouchData setAPIResponseCallback qrCode setRequestMetaData setAPIUrl getAPIUrl setDMAParamsForEEA".split(" "), 0);
 
         // Initialize Branch
-        branch.init('key_live_jAozxBAhXn9NYeOS8Vj8BefnDxdempwR', function (err, data) {
+        branch.init('key_live_jveDhIVvDiCtfFUER6qYxkggEDerqp2j', function (err, data) {
             if (err) {
                 console.error('Branch initialization failed:', err);
             } else {
@@ -135,7 +127,7 @@
             // Parse user agent to get OS and OS version
             const parser = new UAParser(userAgent);
             const os = parser.getOS().name;
-            const osVersion = parser.getOS().version;
+            const osVersion = parser.getOS().version.join('.');
 
             // Get the public IP address
             getPublicIp().then(ip => {
@@ -232,7 +224,7 @@
                             }
                         ],
                         "metadata": {},
-                        "branch_key": "key_live_jAozxBAhXn9NYeOS8Vj8BefnDxdempwR"
+                        "branch_key": "key_live_jveDhIVvDiCtfFUER6qYxkggEDerqp2j"
                     };
 
                     // Send the request
