@@ -11,6 +11,7 @@
 <body>
     <h1>Branch Web SDK Integration</h1>
     <button id="branch-link">Create Branch Link</button>
+    <button id="custom-event">Trigger Custom Event</button>
     <h2>Branch Quick Link Reader</h2>
     <div class="data-box" id="quick-link-data">
         Loading Branch link data...
@@ -79,6 +80,25 @@
                 }
             });
         });
+
+
+        // Example: Trigger a custom event on button click
+        document.getElementById('custom-event').addEventListener('click', function () {
+            // Define custom event data
+            var customData = {
+                "Custom_Event_Property_Key1": "Custom_Event_Property_val1",
+                "Custom_Event_Property_Key2": "Custom_Event_Property_val2"
+            };
+
+            // Log event
+            branch.logEvent(
+                'custom_event_name',
+                custom_data,
+                function (err) { console.log(err); }
+            );
+        });
+
+
     </script>
 </body>
 
