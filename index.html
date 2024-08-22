@@ -4,10 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Branch Web SDK Demo</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>Branch Web SDK Integration</h1>
     <button id="branch-link">Create Branch Link</button>
+    <h1>Branch Quick Link Reader</h1>
+    <div class="data-box" id="quick-link-data">
+        Loading Branch link data...
+    </div>
 
     <script>
         // Load Branch Web SDK
@@ -19,7 +24,17 @@
                 console.error('Branch initialization failed:', err);
             } else {
                 console.log('Branch initialized:', data);
-            }
+
+                // Check if the Branch link data is available
+                if (data && data['+clicked_branch_link']) {
+                    // Successfully retrieved the data from a Branch link
+                    document.getElementById('quick-link-data').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    console.log('Branch link data:', data);
+                } else {
+                    // No Branch link data available
+                    document.getElementById('quick-link-data').innerText = 'No Branch link data found.';
+                    console.log('No Branch link data found.');
+                }
         });
 
         // Example: Create a Branch link on button click
