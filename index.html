@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Branch Web SDK Demo</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <h1>Branch Web SDK Integration</h1>
     <button id="branch-link">Create Branch Link</button>
@@ -16,46 +18,46 @@
 
     <script>
         // Load Branch Web SDK
-                 (function(b,r,a,n,c,h,_,s,d,k){if(!b[n]||!b[n]._q){for(;s<_.length;)c(h,_[s++]);d=r.createElement(a);d.async=1;d.src="https://cdn.branch.io/branch-latest.min.js";k=r.getElementsByTagName(a)[0];k.parentNode.insertBefore(d,k);b[n]=h}})(window,document,"script","branch",function(b,r){b[r]=function(){b._q.push([r,arguments])}},{_q:[],_v:1},"addListener banner closeBanner closeJourney data deepview deepviewCta first init link logout removeListener setBranchViewData setIdentity track trackCommerceEvent logEvent disableTracking getBrowserFingerprintId crossPlatformIds lastAttributedTouchData setAPIResponseCallback qrCode setRequestMetaData setAPIUrl getAPIUrl setDMAParamsForEEA".split(" "), 0);
+        (function (b, r, a, n, c, h, _, s, d, k) { if (!b[n] || !b[n]._q) { for (; s < _.length;)c(h, _[s++]); d = r.createElement(a); d.async = 1; d.src = "https://cdn.branch.io/branch-latest.min.js"; k = r.getElementsByTagName(a)[0]; k.parentNode.insertBefore(d, k); b[n] = h } })(window, document, "script", "branch", function (b, r) { b[r] = function () { b._q.push([r, arguments]) } }, { _q: [], _v: 1 }, "addListener banner closeBanner closeJourney data deepview deepviewCta first init link logout removeListener setBranchViewData setIdentity track trackCommerceEvent logEvent disableTracking getBrowserFingerprintId crossPlatformIds lastAttributedTouchData setAPIResponseCallback qrCode setRequestMetaData setAPIUrl getAPIUrl setDMAParamsForEEA".split(" "), 0);
 
         // Initialize Branch
-        branch.init('key_live_jAozxBAhXn9NYeOS8Vj8BefnDxdempwR', function(err, data) {
+        branch.init('key_live_jAozxBAhXn9NYeOS8Vj8BefnDxdempwR', function (err, data) {
             if (err) {
                 console.error('Branch initialization failed:', err);
             } else {
                 console.log('Branch initialized:', data);
-                                    alert('Branch link data: ' + data);
 
-                    // Check if the Branch link data is available
-        if (data && data['+clicked_branch_link']) {
-            // Parse the JSON string inside the 'data' property
-            var parsedData = JSON.parse(data.data);
+                // Check if the data object is present
+                if (data) {
+                    console.log('Data is present:', data);
 
-            // Prepare the complete object to display
-            var displayData = {
-                browser_fingerprint_id: data.browser_fingerprint_id,
-                has_app: data.has_app,
-                identity_id: data.identity_id,
-                link: data.link,
-                referring_link: data.referring_link,
-                session_id: data.session_id,
-                session_link_click_id: data.session_link_click_id,
-                ...parsedData // Spread operator to include parsed data fields
-            };
+                    // Parse the JSON string in the `data` property
+                    try {
+                        var parsedData = JSON.parse(data.data);
 
-            // Successfully retrieved and parsed the data from a Branch link
-            document.getElementById('quick-link-data').innerHTML = `<pre>${JSON.stringify(displayData, null, 2)}</pre>`;
-            console.log('Branch link data:', displayData);
-        } else {
-            // No Branch link data available
-            document.getElementById('quick-link-data').innerText = 'No Branch link data found.';
-            console.log('No Branch link data found.');
-        }
+                        // Check if `+clicked_branch_link` is present and truthy
+                        if (parsedData['+clicked_branch_link']) {
+                            console.log('Branch link was clicked:', parsedData['+clicked_branch_link']);
+
+                            // Display the parsed data
+                            document.getElementById('quick-link-data').innerHTML = `<pre>${JSON.stringify(parsedData, null, 2)}</pre>`;
+                        } else {
+                            console.log('Branch link not clicked.');
+                            document.getElementById('quick-link-data').innerText = 'No Branch link data found.';
+                        }
+                    } catch (e) {
+                        console.error('Error parsing data:', e);
+                        document.getElementById('quick-link-data').innerText = 'Error parsing Branch link data.';
+                    }
+                } else {
+                    console.log('No data received.');
+                    document.getElementById('quick-link-data').innerText = 'No data received.';
+                }
             }
         });
 
         // Example: Create a Branch link on button click
-        document.getElementById('branch-link').addEventListener('click', function() {
+        document.getElementById('branch-link').addEventListener('click', function () {
             branch.link({
                 tags: ['tag1', 'tag2'],
                 channel: 'website',
@@ -68,7 +70,7 @@
                     '$ios_url': 'https://example.com/ios',
                     '$android_url': 'https://example.com/android'
                 }
-            }, function(err, link) {
+            }, function (err, link) {
                 if (err) {
                     console.error('Failed to create link:', err);
                 } else {
@@ -79,4 +81,5 @@
         });
     </script>
 </body>
+
 </html>
