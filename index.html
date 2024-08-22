@@ -11,17 +11,10 @@
 
     <script>
         // Load Branch Web SDK
-        (function(b,r,a,n,c,h,_,s,d,k){
-            if(!b[n]||!b[n]._q){
-                for(;s<_.length;)c(h,_[s++]);
-                d=r.createElement(a);d.async=1;d.src="https://cdn.branch.io/branch-latest.min.js";
-                k=r.getElementsByTagName(a)[0];k.parentNode.insertBefore(d,k);
-                b[n]=h;b[n]._q=[];function c(h,i){h[i]=function(){h._q.push([i,arguments])}};
-                _=['init','data','first','setIdentity','setBranchViewData','disableTracking','logEvent','link','sendSMS','referrals','credits','redeem','autotrack','banner','closeBanner','track','validateBanner','bannerDetails','closeBanner','bannerDetails','appLink','journeys','appLinks','setIdentity','logout','session'];for(s=0;s<_.length;s++)c(b[n],_[s])}
-        })(window,document,"script","branch");
+                 (function(b,r,a,n,c,h,_,s,d,k){if(!b[n]||!b[n]._q){for(;s<_.length;)c(h,_[s++]);d=r.createElement(a);d.async=1;d.src="https://cdn.branch.io/branch-latest.min.js";k=r.getElementsByTagName(a)[0];k.parentNode.insertBefore(d,k);b[n]=h}})(window,document,"script","branch",function(b,r){b[r]=function(){b._q.push([r,arguments])}},{_q:[],_v:1},"addListener banner closeBanner closeJourney data deepview deepviewCta first init link logout removeListener setBranchViewData setIdentity track trackCommerceEvent logEvent disableTracking getBrowserFingerprintId crossPlatformIds lastAttributedTouchData setAPIResponseCallback qrCode setRequestMetaData setAPIUrl getAPIUrl setDMAParamsForEEA".split(" "), 0);
 
         // Initialize Branch
-        branch.init('YOUR_BRANCH_KEY', function(err, data) {
+        branch.init('key_live_jAozxBAhXn9NYeOS8Vj8BefnDxdempwR', function(err, data) {
             if (err) {
                 console.error('Branch initialization failed:', err);
             } else {
