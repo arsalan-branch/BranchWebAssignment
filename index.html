@@ -25,16 +25,31 @@
             } else {
                 console.log('Branch initialized:', data);
 
-                // Check if the Branch link data is available
-                if (data && data['+clicked_branch_link']) {
-                    // Successfully retrieved the data from a Branch link
-                    document.getElementById('quick-link-data').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-                    console.log('Branch link data:', data);
-                } else {
-                    // No Branch link data available
-                    document.getElementById('quick-link-data').innerText = 'No Branch link data found.';
-                    console.log('No Branch link data found.');
-                }
+                    // Check if the Branch link data is available
+        if (data && data['+clicked_branch_link']) {
+            // Parse the JSON string inside the 'data' property
+            var parsedData = JSON.parse(data.data);
+
+            // Prepare the complete object to display
+            var displayData = {
+                browser_fingerprint_id: data.browser_fingerprint_id,
+                has_app: data.has_app,
+                identity_id: data.identity_id,
+                link: data.link,
+                referring_link: data.referring_link,
+                session_id: data.session_id,
+                session_link_click_id: data.session_link_click_id,
+                ...parsedData // Spread operator to include parsed data fields
+            };
+
+            // Successfully retrieved and parsed the data from a Branch link
+            document.getElementById('quick-link-data').innerHTML = `<pre>${JSON.stringify(displayData, null, 2)}</pre>`;
+            console.log('Branch link data:', displayData);
+        } else {
+            // No Branch link data available
+            document.getElementById('quick-link-data').innerText = 'No Branch link data found.';
+            console.log('No Branch link data found.');
+        }
             }
         });
 
