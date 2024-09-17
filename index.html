@@ -34,42 +34,42 @@
         (function (b, r, a, n, c, h, _, s, d, k) { if (!b[n] || !b[n]._q) { for (; s < _.length;)c(h, _[s++]); d = r.createElement(a); d.async = 1; d.src = "https://cdn.branch.io/branch-latest.min.js"; k = r.getElementsByTagName(a)[0]; k.parentNode.insertBefore(d, k); b[n] = h } })(window, document, "script", "branch", function (b, r) { b[r] = function () { b._q.push([r, arguments]) } }, { _q: [], _v: 1 }, "addListener banner closeBanner closeJourney data deepview deepviewCta first init link logout removeListener setBranchViewData setIdentity track trackCommerceEvent logEvent disableTracking getBrowserFingerprintId crossPlatformIds lastAttributedTouchData setAPIResponseCallback qrCode setRequestMetaData setAPIUrl getAPIUrl setDMAParamsForEEA".split(" "), 0);
 
         // Initialize Branch
-        // branch.init('key_live_jAozxBAhXn9NYeOS8Vj8BefnDxdempwR', function (err, data) {
-        //     if (err) {
-        //         console.error('Branch initialization failed:', err);
-        //     } else {
-        //         console.log('Branch initialized:', data);
+        branch.init('key_live_jAozxBAhXn9NYeOS8Vj8BefnDxdempwR', function (err, data) {
+            if (err) {
+                console.error('Branch initialization failed:', err);
+            } else {
+                console.log('Branch initialized:', data);
 
-        //         // Check if the data object is present
-        //         if (data) {
-        //             console.log('Data is present:', data);
+                // Check if the data object is present
+                if (data) {
+                    console.log('Data is present:', data);
 
-        //             // Parse the JSON string in the `data` property
-        //             try {
-        //                 var parsedData = JSON.parse(data.data);
+                    // Parse the JSON string in the `data` property
+                    try {
+                        var parsedData = JSON.parse(data.data);
 
-        //                 // Check if `+clicked_branch_link` is present and truthy
-        //                 if (parsedData['+clicked_branch_link']) {
-        //                     console.log('Branch link was clicked:', parsedData['+clicked_branch_link']);
+                        // Check if `+clicked_branch_link` is present and truthy
+                        if (parsedData['+clicked_branch_link']) {
+                            console.log('Branch link was clicked:', parsedData['+clicked_branch_link']);
 
-        //                     // Display the parsed data
-        //                     document.getElementById('quick-link-data').innerHTML = `<pre>${JSON.stringify(parsedData, null, 2)}</pre>`;
-        //                 } else {
-        //                     console.log('Branch link not clicked.');
-        //                     document.getElementById('quick-link-data').innerText = 'No Branch link data found.';
-        //                 }
-        //             } catch (e) {
-        //                 console.error('Error parsing data:', e);
-        //                 document.getElementById('quick-link-data').innerText = 'Error parsing Branch link data.';
-        //             }
-        //         } else {
-        //             console.log('No data received.');
-        //             document.getElementById('quick-link-data').innerText = 'No data received.';
-        //         }
-        //     }
-        // });
+                            // Display the parsed data
+                            document.getElementById('quick-link-data').innerHTML = `<pre>${JSON.stringify(parsedData, null, 2)}</pre>`;
+                        } else {
+                            console.log('Branch link not clicked.');
+                            document.getElementById('quick-link-data').innerText = 'No Branch link data found.';
+                        }
+                    } catch (e) {
+                        console.error('Error parsing data:', e);
+                        document.getElementById('quick-link-data').innerText = 'Error parsing Branch link data.';
+                    }
+                } else {
+                    console.log('No data received.');
+                    document.getElementById('quick-link-data').innerText = 'No data received.';
+                }
+            }
+        });
 
-        branch.init( 'key_live_jAozxBAhXn9NYeOS8Vj8BefnDxdempwR', {‘tracking_disabled’ : false});
+        // branch.init( 'key_live_jAozxBAhXn9NYeOS8Vj8BefnDxdempwR', {‘tracking_disabled’ : false});
 
         // Example: Create a Branch link on button click
         document.getElementById('branch-link').addEventListener('click', function () {
