@@ -30,23 +30,23 @@
     </div>
 
 <script>
-  var now = new Date().getTime();
-  var timeout = 2000;
-  var hasApp = true;
+    (function () {
+      const appSchemeUrl = 'dogsapp://some/path'; // Replace with your actual deep link
+      const now = Date.now();
 
-  setTimeout(function () {
-    if (!hasApp) {
-      // Stay on the same site — do nothing
-      console.log("App not detected. Staying on the site.");
-    }
-  }, timeout);
+      // Start timer to detect failure
+      const fallbackTimeout = setTimeout(function () {
+        const elapsed = Date.now() - now;
+        if (elapsed < 1500) {
+          console.log("App not detected. Staying on the site.");
+          // Optional: show a message to the user here
+        }
+      }, 1000);
 
-  window.location = 'dogsapp://https://justeat-ie.app.link/app_instl_engm_ie?%243p=a_awin&awin_merchant_id={awin_merchant_id}&~ad_set_id=!!!gid!!!&~campaign=!!!campaign!!!&~click_id=!!!awc!!!&~creative_id=!!!linkid!!!&~secondary_publisher=!!!sitename!!!&~secondary_publisher_id=!!!id!!!&link_click_id=link-1466690107561174510';
-
-  setTimeout(function () {
-    hasApp = false;
-  }, 100);
-</script>
+      // Try opening the app
+      window.location = appSchemeUrl;
+    })();
+  </script>
 
 
 
