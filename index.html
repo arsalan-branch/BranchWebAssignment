@@ -82,26 +82,33 @@
         Loading Branch link data...
     </div>
 
-    <script>
-        (function () {
-            const appSchemeUrl = 'dogsapp://some/path'; // Replace with your actual deep link
-            const now = Date.now();
+    <!--
+        NOTE: The old inline script here used to run `window.location = 'dogsapp://some/path'`
+        immediately and synchronously on page load. On mobile browsers (e.g. iOS Safari), assigning
+        window.location to an unrecognized custom URL scheme is treated as a real navigation
+        attempt and can abort/interrupt the current page load — which was preventing the Branch
+        SDK script (loaded further down) from ever executing. That's why cdn.branch.io never
+        showed up in the network log.
 
-            // Start timer to detect failure
-            const fallbackTimeout = setTimeout(function () {
-                const elapsed = Date.now() - now;
-                if (elapsed < 1500) {
-                    console.log("App not detected. Staying on the site.");
-                    // Optional: show a message to the user here
-                }
-            }, 1000);
-
-            // Try opening the app
-            window.location = appSchemeUrl;
-        })();
-    </script>
+        The deep link is still available via the "Open App" link in the button-container above,
+        which only fires on a user click (safe) instead of automatically on page load (unsafe).
+        If you need an automatic app-open-with-fallback flow, do it AFTER Branch has initialized,
+        and prefer a hidden iframe or a delayed location change over an immediate top-level
+        window.location assignment.
+    -->
 
     <script>
+        // Fallback: if Branch SDK / fingerprint hasn't loaded within 6s, show a diagnostic message
+        // instead of leaving the UI stuck on "Loading...". This usually means cdn.branch.io or
+        // api2.branch.io was blocked (ad-blocker, tracking protection, or corporate firewall).
+        setTimeout(function () {
+            const fpTextEl = document.getElementById('fingerprint-id-text');
+            if (fpTextEl && fpTextEl.innerText.indexOf('Loading') === 0) {
+                fpTextEl.innerText = 'Timed out. Branch SDK may be blocked by an ad-blocker/tracking protection, or the browser is offline. Check the console/network tab for blocked requests to cdn.branch.io or api2.branch.io.';
+                console.warn('Branch Fingerprint ID did not resolve within 6s — check for blocked network requests to cdn.branch.io / api2.branch.io.');
+            }
+        }, 6000);
+
         // Load Branch Web SDK
         (function (b, r, a, n, c, h, _, s, d, k) { if (!b[n] || !b[n]._q) { for (; s < _.length;)c(h, _[s++]); d = r.createElement(a); d.async = 1; d.src = "https://cdn.branch.io/branch-latest.min.js"; k = r.getElementsByTagName(a)[0]; k.parentNode.insertBefore(d, k); b[n] = h } })(window, document, "script", "branch", function (b, r) { b[r] = function () { b._q.push([r, arguments]) } }, { _q: [], _v: 1 }, "addListener banner closeBanner closeJourney data deepview deepviewCta first init link logout removeListener setBranchViewData setIdentity track trackCommerceEvent logEvent disableTracking getBrowserFingerprintId crossPlatformIds lastAttributedTouchData setAPIResponseCallback qrCode setRequestMetaData setAPIUrl getAPIUrl setDMAParamsForEEA".split(" "), 0);
 
@@ -142,16 +149,25 @@
 
             // ---- Fetch and display the Browser Fingerprint ID ----
             // Docs: https://help.branch.io/developer-hub/docs/web-full-reference#getbrowserfingerprintid
-            branch.getBrowserFingerprintId(function (fpErr, browserFingerprintId) {
-                const fpTextEl = document.getElementById('fingerprint-id-text');
-                if (fpErr) {
-                    console.error('Error getting browser fingerprint ID:', fpErr);
-                    fpTextEl.innerText = 'Error retrieving Browser Fingerprint ID.';
-                } else {
-                    console.log('Browser Fingerprint ID:', browserFingerprintId);
-                    fpTextEl.innerText = browserFingerprintId;
-                }
-            });
+            console.log('branch.init callback fired, requesting fingerprint ID...');
+            try {
+                branch.getBrowserFingerprintId(function (fpErr, browserFingerprintId) {
+                    const fpTextEl = document.getElementById('fingerprint-id-text');
+                    if (fpErr) {
+                        console.error('Error getting browser fingerprint ID:', fpErr);
+                        fpTextEl.innerText = 'Error retrieving Browser Fingerprint ID: ' + (fpErr.message || JSON.stringify(fpErr));
+                    } else if (!browserFingerprintId) {
+                        console.warn('getBrowserFingerprintId returned no value.');
+                        fpTextEl.innerText = 'No Browser Fingerprint ID returned by SDK.';
+                    } else {
+                        console.log('Browser Fingerprint ID:', browserFingerprintId);
+                        fpTextEl.innerText = browserFingerprintId;
+                    }
+                });
+            } catch (fpException) {
+                console.error('Exception calling getBrowserFingerprintId:', fpException);
+                document.getElementById('fingerprint-id-text').innerText = 'Exception calling getBrowserFingerprintId — see console.';
+            }
         });
 
         // branch.init( 'key_live_jAozxBAhXn9NYeOS8Vj8BefnDxdempwR', {‘tracking_disabled’ : false});
