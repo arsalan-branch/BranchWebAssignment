@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Branch Web SDK Demo</title>
-    
+
+    <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="Let's see the og tags updated">
     <meta property="og:description" content="Testing the updation of og tags">
     <meta property="og:image" content="https://image10.coupangcdn.com/image/mobile/v3/img_fb_like.png">
@@ -14,40 +15,68 @@
     <meta property="og:site_name" content="Branch Web SDK Demo">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/ua-parser-js/dist/ua-parser.min.js"></script>
+
     <style>
-        /* Small addition for layout aesthetics */
-        .fingerprint-container {
-            margin: 15px 0;
-            padding: 10px;
-            background-color: #f4f4f4;
-            border: 1px solid #ddd;
-            display: inline-flex;
+        /* Minimal styling for the fingerprint box (safe to remove if styles.css already covers this) */
+        .fingerprint-box {
+            display: flex;
             align-items: center;
             gap: 10px;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            max-width: 600px;
+            font-family: monospace;
         }
-        .copy-btn {
+
+        #fingerprint-id-text {
+            user-select: all;         /* makes the text easily selectable/copiable */
+            word-break: break-all;
+            flex: 1;
+        }
+
+        #copy-fingerprint-btn {
             cursor: pointer;
-            padding: 4px 8px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid #999;
+            background: #f5f5f5;
+        }
+
+        #copy-fingerprint-btn:hover {
+            background: #e9e9e9;
+        }
+
+        .copy-feedback {
             font-size: 12px;
+            color: green;
+            margin-left: 6px;
         }
     </style>
 </head>
 
 <body>
     <h1>Branch Web SDK Integration</h1>
-    
-    <div class="fingerprint-container">
-        <strong>Browser Fingerprint ID:</strong> 
-        <span id="fingerprint-display">Loading...</span>
-        <button id="copy-fingerprint-btn" class="copy-btn" style="display: none;">Copy</button>
-    </div>
-
     <div class="button-container">
         <button id="branch-link">Create Branch Link</button>
         <button id="custom-event">Trigger Custom Event</button>
         <button id="s2s-event">Trigger S2S Purchase</button>
         <a href="dogsapp://some/path">Open App</a>
     </div>
+
+    <h2>Browser Fingerprint ID</h2>
+    <!--
+        Reference: https://help.branch.io/developer-hub/docs/web-full-reference#getbrowserfingerprintid
+        branch.getBrowserFingerprintId(callback) returns a unique identifier for the browser,
+        which persists across sessions unless cookies/local storage are cleared.
+    -->
+    <div class="fingerprint-box">
+        <span id="fingerprint-id-text">Loading Browser Fingerprint ID...</span>
+        <button id="copy-fingerprint-btn">Copy</button>
+        <span class="copy-feedback" id="copy-feedback" style="display:none;">Copied!</span>
+    </div>
+
     <h2>Branch Quick Link Reader</h2>
     <div class="data-box" id="quick-link-data">
         Loading Branch link data...
@@ -55,20 +84,20 @@
 
     <script>
         (function () {
-          const appSchemeUrl = 'dogsapp://some/path'; // Replace with your actual deep link
-          const now = Date.now();
+            const appSchemeUrl = 'dogsapp://some/path'; // Replace with your actual deep link
+            const now = Date.now();
 
-          // Start timer to detect failure
-          const fallbackTimeout = setTimeout(function () {
-            const elapsed = Date.now() - now;
-            if (elapsed < 1500) {
-              console.log("App not detected. Staying on the site.");
-              // Optional: show a message to the user here
-            }
-          }, 1000);
+            // Start timer to detect failure
+            const fallbackTimeout = setTimeout(function () {
+                const elapsed = Date.now() - now;
+                if (elapsed < 1500) {
+                    console.log("App not detected. Staying on the site.");
+                    // Optional: show a message to the user here
+                }
+            }, 1000);
 
-          // Try opening the app
-          window.location = appSchemeUrl;
+            // Try opening the app
+            window.location = appSchemeUrl;
         })();
     </script>
 
@@ -80,35 +109,8 @@
         branch.init('key_live_jveDhIVvDiCtfFUER6qYxkggEDerqp2j', function (err, data) {
             if (err) {
                 console.error('Branch initialization failed:', err);
-                document.getElementById('fingerprint-display').innerText = 'Initialization failed';
             } else {
                 console.log('Branch initialized:', data);
-
-                // Fetch and Print Browser Fingerprint ID
-                branch.getBrowserFingerprintId(function (err, browserFingerprintId) {
-                    const displayElem = document.getElementById('fingerprint-display');
-                    const copyBtn = document.getElementById('copy-fingerprint-btn');
-                    
-                    if (err) {
-                        console.error('Error fetching Browser Fingerprint ID:', err);
-                        displayElem.innerText = 'Unavailable';
-                    } else if (browserFingerprintId) {
-                        displayElem.innerText = browserFingerprintId;
-                        copyBtn.style.display = 'inline-block'; // Show copy button
-
-                        // Setup click-to-copy functionality
-                        copyBtn.addEventListener('click', function() {
-                            navigator.clipboard.writeText(browserFingerprintId).then(function() {
-                                copyBtn.innerText = 'Copied!';
-                                setTimeout(() => copyBtn.innerText = 'Copy', 2000);
-                            }).catch(function(err) {
-                                console.error('Could not copy text: ', err);
-                            });
-                        });
-                    } else {
-                        displayElem.innerText = 'None returned';
-                    }
-                });
 
                 // Check if the data object is present
                 if (data) {
@@ -137,7 +139,27 @@
                     document.getElementById('quick-link-data').innerText = 'No data received.';
                 }
             }
+
+            // ---- Fetch and display the Browser Fingerprint ID ----
+            // Docs: https://help.branch.io/developer-hub/docs/web-full-reference#getbrowserfingerprintid
+            branch.getBrowserFingerprintId(function (fpErr, browserFingerprintId) {
+                const fpTextEl = document.getElementById('fingerprint-id-text');
+                if (fpErr) {
+                    console.error('Error getting browser fingerprint ID:', fpErr);
+                    fpTextEl.innerText = 'Error retrieving Browser Fingerprint ID.';
+                } else {
+                    console.log('Browser Fingerprint ID:', browserFingerprintId);
+                    fpTextEl.innerText = browserFingerprintId;
+                }
+            });
         });
+
+        // branch.init( 'key_live_jAozxBAhXn9NYeOS8Vj8BefnDxdempwR', {‘tracking_disabled’ : false});
+
+        window.addEventListener('load', function () {
+            window.location.href = "https://ziffi.app.link/e/down";
+        });
+
 
         // Example: Create a Branch link on button click
         document.getElementById('branch-link').addEventListener('click', function () {
@@ -166,11 +188,13 @@
 
         // Example: Trigger a custom event on button click
         document.getElementById('custom-event').addEventListener('click', function () {
+            // Define custom event data
             var customData = {
                 "Custom_Event_Property_Key1": "Custom_Event_Property_val1",
                 "Custom_Event_Property_Key2": "Custom_Event_Property_val2"
             };
 
+            // Log custom event
             branch.logEvent(
                 'custom_event_name',
                 customData,
@@ -185,7 +209,9 @@
         });
 
 
-        // S2S Event Setup
+        //S2S
+
+        // Function to fetch the public IP address
         function getPublicIp() {
             return fetch('https://api.ipify.org?format=json')
                 .then(response => response.json())
@@ -193,19 +219,26 @@
                 .catch(() => 'unknown');
         }
 
+        // Function to send the purchase event
         function sendPurchaseEvent() {
+            // Get the user agent from the browser
             const userAgent = navigator.userAgent;
+
+            // Parse user agent to get OS and OS version
             const parser = new UAParser(userAgent);
             const os = parser.getOS().name;
             const osVersion = parser.getOS().version;
 
+            // Get the public IP address
             getPublicIp().then(ip => {
+                // Get browser fingerprint ID
                 branch.getBrowserFingerprintId(function (err, browserFingerprintId) {
                     if (err) {
                         console.error('Error getting browser fingerprint ID:', err);
                         return;
                     }
 
+                    // Define the event payload
                     const eventPayload = {
                         "name": "PURCHASE",
                         "customer_event_alias": "my custom alias",
@@ -216,8 +249,8 @@
                             "browser_fingerprint_id": browserFingerprintId,
                             "language": "en",
                             "ip": ip,
-                            "local_ip": "192.168.1.2", 
-                            "app_version": "1.0.0",
+                            "local_ip": "192.168.1.2",
+                            "app_version": "1.0.0", // Example static value
                             "user_agent": userAgent,
                             "os": os
                         },
@@ -294,6 +327,7 @@
                         "branch_key": "key_live_jAozxBAhXn9NYeOS8Vj8BefnDxdempwR"
                     };
 
+                    // Send the request
                     fetch('https://api2.branch.io/v2/event/standard', {
                         method: 'POST',
                         headers: {
@@ -301,18 +335,48 @@
                         },
                         body: JSON.stringify(eventPayload)
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Event successfully sent:', data);
-                    })
-                    .catch((error) => {
-                        console.error('Error sending event:', error);
-                    });
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Event successfully sent:', data);
+                        })
+                        .catch((error) => {
+                            console.error('Error sending event:', error);
+                        });
                 });
             });
         }
 
+
+        // Example usage: Trigger the event when a button is clicked
         document.getElementById('s2s-event').addEventListener('click', sendPurchaseEvent);
+
+
+        // ---- Copy Browser Fingerprint ID to clipboard ----
+        document.getElementById('copy-fingerprint-btn').addEventListener('click', function () {
+            const fpText = document.getElementById('fingerprint-id-text').innerText;
+            const feedbackEl = document.getElementById('copy-feedback');
+
+            function showCopiedFeedback() {
+                feedbackEl.style.display = 'inline';
+                setTimeout(() => { feedbackEl.style.display = 'none'; }, 1500);
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(fpText)
+                    .then(showCopiedFeedback)
+                    .catch(err => console.error('Failed to copy:', err));
+            } else {
+                // Fallback for older browsers
+                const tempInput = document.createElement('textarea');
+                tempInput.value = fpText;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                showCopiedFeedback();
+            }
+        });
+
     </script>
 </body>
 
