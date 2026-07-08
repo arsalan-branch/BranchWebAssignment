@@ -76,6 +76,19 @@
         <span class="copy-feedback" id="copy-feedback" style="display:none;">Copied!</span>
     </div>
 
+    <h2>Has App (from branch.init)</h2>
+    <!--
+        Reference: https://help.branch.io/developer-hub/docs/web-full-reference#init
+        The `data` object passed to the branch.init() callback includes a `has_app` boolean
+        field, indicating whether the current user already has the app installed.
+    -->
+    <div class="fingerprint-box">
+        <span id="has-app-text">Loading has_app status...</span>
+        <button id="copy-has-app-btn">Copy</button>
+        <span class="copy-feedback" id="copy-has-app-feedback" style="display:none;">Copied!</span>
+    </div>
+
+
     <h2>Branch Quick Link Reader</h2>
     <div class="data-box" id="quick-link-data">
         Loading Branch link data...
@@ -106,17 +119,35 @@
                 fpTextEl.innerText = 'Timed out. Branch SDK may be blocked by an ad-blocker/tracking protection, or the browser is offline. Check the console/network tab for blocked requests to cdn.branch.io or api2.branch.io.';
                 console.warn('Branch Fingerprint ID did not resolve within 6s — check for blocked network requests to cdn.branch.io / api2.branch.io.');
             }
+            const hasAppTextEl = document.getElementById('has-app-text');
+            if (hasAppTextEl && hasAppTextEl.innerText.indexOf('Loading') === 0) {
+                hasAppTextEl.innerText = 'Timed out waiting for branch.init(). Check console/network tab.';
+                console.warn('has_app did not resolve within 6s — branch.init() callback likely never fired.');
+            }
         }, 6000);
 
         // Load Branch Web SDK
         (function (b, r, a, n, c, h, _, s, d, k) { if (!b[n] || !b[n]._q) { for (; s < _.length;)c(h, _[s++]); d = r.createElement(a); d.async = 1; d.src = "https://cdn.branch.io/branch-latest.min.js"; k = r.getElementsByTagName(a)[0]; k.parentNode.insertBefore(d, k); b[n] = h } })(window, document, "script", "branch", function (b, r) { b[r] = function () { b._q.push([r, arguments]) } }, { _q: [], _v: 1 }, "addListener banner closeBanner closeJourney data deepview deepviewCta first init link logout removeListener setBranchViewData setIdentity track trackCommerceEvent logEvent disableTracking getBrowserFingerprintId crossPlatformIds lastAttributedTouchData setAPIResponseCallback qrCode setRequestMetaData setAPIUrl getAPIUrl setDMAParamsForEEA".split(" "), 0);
 
         // Initialize Branch
-        branch.init('key_live_jwdI1NVUzLTD8iCyJng6ofceDsbCMXgW', function (err, data) {
+        branch.init('key_live_jveDhIVvDiCtfFUER6qYxkggEDerqp2j', function (err, data) {
+            const hasAppTextEl = document.getElementById('has-app-text');
+
             if (err) {
                 console.error('Branch initialization failed:', err);
+                hasAppTextEl.innerText = 'Error: could not determine has_app (init failed).';
             } else {
                 console.log('Branch initialized:', data);
+
+                // ---- has_app: whether the current user already has the app installed ----
+                // Reference: https://help.branch.io/developer-hub/docs/web-full-reference#init
+                if (data && typeof data.has_app !== 'undefined') {
+                    console.log('has_app:', data.has_app);
+                    hasAppTextEl.innerText = String(data.has_app);
+                } else {
+                    console.warn('has_app field not present in init callback data.');
+                    hasAppTextEl.innerText = 'has_app not present in response.';
+                }
 
                 // Check if the data object is present
                 if (data) {
@@ -169,6 +200,7 @@
             }
         });
 
+        // branch.init( 'key_live_jAozxBAhXn9NYeOS8Vj8BefnDxdempwR', {‘tracking_disabled’ : false});
 
 
         // Example: Create a Branch link on button click
@@ -379,6 +411,31 @@
                 // Fallback for older browsers
                 const tempInput = document.createElement('textarea');
                 tempInput.value = fpText;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                showCopiedFeedback();
+            }
+        });
+
+        // ---- Copy has_app status to clipboard ----
+        document.getElementById('copy-has-app-btn').addEventListener('click', function () {
+            const hasAppText = document.getElementById('has-app-text').innerText;
+            const feedbackEl = document.getElementById('copy-has-app-feedback');
+
+            function showCopiedFeedback() {
+                feedbackEl.style.display = 'inline';
+                setTimeout(() => { feedbackEl.style.display = 'none'; }, 1500);
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(hasAppText)
+                    .then(showCopiedFeedback)
+                    .catch(err => console.error('Failed to copy:', err));
+            } else {
+                const tempInput = document.createElement('textarea');
+                tempInput.value = hasAppText;
                 document.body.appendChild(tempInput);
                 tempInput.select();
                 document.execCommand('copy');
